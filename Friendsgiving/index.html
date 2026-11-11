@@ -85,6 +85,11 @@ input[type=text]{width:100%;padding:11px 12px;border:2px solid var(--ink);border
 .x{background:none;border:0;cursor:pointer;font-family:var(--body);font-size:18px;line-height:1;padding:2px 4px;color:var(--tape-ink);opacity:.65}
 .x:hover{opacity:1}
 .tbd{font-family:var(--hand);font-size:22px;color:var(--muted)}
+.cardadd{display:flex;gap:6px;align-items:center;width:100%}
+.cardadd input{flex:1;min-width:0;padding:8px 10px}
+.cardadd .btn{padding:6px 12px;box-shadow:2px 2px 0 var(--ink)}
+.addlink{background:none;border:2px dashed var(--ink);border-radius:4px;padding:6px 10px;font-weight:700;font-size:14px;cursor:pointer;align-self:flex-start}
+.music{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:15;background:var(--mustard);color:var(--mustard-ink);border:3px solid var(--ink);border-radius:99px;padding:8px 14px;font-weight:700;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
 .empty{border:3px dashed var(--line);border-radius:6px;padding:22px;color:var(--muted)}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 .locked{padding-block:18vh 40px;display:flex;flex-direction:column;gap:12px}
@@ -94,6 +99,7 @@ input[type=text]{width:100%;padding:11px 12px;border:2px solid var(--ink);border
 </head>
 <body>
 <canvas id="confetti" hidden></canvas>
+<button class="music" id="music" type="button" hidden aria-pressed="false">♪ Music off</button>
 
 <div class="wrap locked" id="locked">
   <h2 id="lockTitle">Opening your invite…</h2>
@@ -143,7 +149,7 @@ input[type=text]{width:100%;padding:11px 12px;border:2px solid var(--ink);border
 </div>
 
 <script type="module">
-const BLOB="hCGOmTdO20tiT+F6dRVbE05gW4DNR7NBjnKNSiL+gZrNcorK2sWahOC287lg8qr6nDO53dtkcoQxSN7gxFh1gBuMx57aAhrpX264+4CZuscUrjE5m1l7m1CVfhtg/rt4HMzh40OxMvoavGfNMB77q7m0XrDySHukQ2A1PbrqKk9A2WbwwX9yqyxqD5ykxQt7IJKbKE9jDY+/AJSNndQf+rxUO+p9FtuMEvWkCWoPMlmPkO532j6OOZy0VdanKES8HCnw6xMLl8aPdvzTL+gOYEzEW5fzk7M0Tc37FKuMv5d56LORMUG2gMJyX/0IUZ/6bNEr/LCezhQEgbQgWWbIqtFt9kIZUewkwbb1DOd5aNDkjSGoPqUBWg05gyani4i1+pSYe4koiymOZ4orV48+i0dYQVXAeIF+ZhhtT+Cz+G8WSXNelV6E7uF2liJgGR0sXbmRw37wUhAH4YVOg7jJlua2gBN+xl7kfCaoF6yZgALN7acd+96uopvAFITes2h7MxG5M0UlocyrA1ffcdk3dEaeyobII1TOkq2937AlyurIF5Rt4MKa6usD4N+MwzUxMiJHsXQXZ5YzWUkBhGB18d5H06p8apcyqPCOZhUvI2F/LM8lkZQPCnFZeLh5M/aH/3w6dDNb72zmDUVK2qeDkSwVyhlSJM/jCcUsUu+jkPTqUnf/3oYoWYb/tiquXH+d8Gu22Mh1oWkiSIC0eTDmgyINjxE5odMOhITjkqJXfzr2Z1ZiB5eQphJUQl2B6fR4YClufa3wiNyBqzOPk7u2rv79954=";
+const BLOB="RRR5GrEUIqyKa/SFBiOOvSRAvndglapTlDDcpN+qnejlmK8wRQ0XMK5ZzzxRqaqYfjqSVakPKtLJvCCX7oSsaGdLiootcTjcQXYPgMYlV2lKGpBf0gQViqI9FkY8W3DCEdMYzryDh19NS15/MR52F9aCp6kTUhD7/SuFfwHM+JTMRaK3FnIZ34g+vVq4M8/o6OFD5eBmyAUrgQbHGuuSiO3dUWi2ryEBbD/Y6wZ2wqwtVOPQV+XdNUSKm5llqz1etb8ySBy0m/ylmS3hea/Uy7Mp66ZchMsrZDeKf/okkwdDocDBptK2FXJnyD30hvLmpMQtRPlIlb1H4H0H5P97bj4+0MhMbMuP/US9JiGf7CAwOhvC7xeOhtF8jy8WMRMyR04WJpk0NqLjrh5Aqe0XruZ/xEcs4Kea0+1fZ/Bo/LX4jst1PtPAJWvr4Rz2ZBPcl8R5rXa26+0xxlwxFZYA6jBLaOCniDHfU0BcQDy/D7Lnsop2ybghjWTpQyVaLBbsP430KgmAUV/AcDuRD0ctYpPa1YbPMk5/zYLCOyjbSpHEgVdWT8x8iUOvvRm8pQYqNl7Pd3LyL2XR5KDH9qShcTGDV28ap63CYChVL4DHmq5EAoYbtrdBOWr1ueUhpS7R4MArnM3VVxWvV5dG8YE+dDYxHuddEPO1SDg79/IaXiTWESz3rBD7hUuRxYMIq3yyM+I9PmV8QZzpHE9NJ4BorAGvlgxEHSwpwWlqHGs+uK5iRtcdlzGPFxBwUzsps3eS3b3Ijhd78xU3AyAZpJr7+uyEFMA=";
 const firebaseConfig={
   apiKey:"AIzaSyCc8gxFBcyhJ371Rnn0zqGLqR2UDKLn3K8",
   authDomain:"friendsgiving-85ccf.firebaseapp.com",
@@ -192,6 +198,7 @@ function run(P){
   const isHost=ls.get(NS+'host')==='1';
   let gid=isHost?'host':(ls.get(NS+'gid')||('g'+Math.random().toString(36).slice(2,12)));
   let saidYes=isHost||ls.get(NS+'yes')==='1';
+  let cardOpen=false,cardDraft='',refocus=false;
   let guests=[],readOnly=false,dbState='loading',pending=0,chain=Promise.resolve(),api=null,seeded=false;
   const mine={name:isHost?P.seed.name:(ls.get(NS+'name')||''),items:[],createdAt:isHost?0:Date.now()};
 
@@ -245,8 +252,20 @@ function run(P){
   function noAway(e){e.preventDefault();const p=e.clientX?local(e):{x:nx+NO_BASE/2,y:ny+NO_BASE/2};dodge(p.x,p.y)}
   no.addEventListener('pointerdown',noAway);no.addEventListener('click',noAway);
   no.addEventListener('focus',()=>dodge(nx+NO_BASE/2,ny+NO_BASE/2));
+  /* ---------- music: plays music.mp3 from this folder if it exists ---------- */
+  const musicBtn=$('music'),audio=new Audio();audio.loop=true;audio.preload='none';audio.volume=.6;
+  let musicReady=false,musicOn=false;
+  function setMusic(on){
+    if(!musicReady)return;
+    if(on){audio.play().then(()=>{musicOn=true;paintMusic()},()=>{musicOn=false;paintMusic()})}
+    else{audio.pause();musicOn=false;paintMusic()}
+  }
+  function paintMusic(){musicBtn.textContent=musicOn?'♪ Music on':'♪ Music off';musicBtn.setAttribute('aria-pressed',String(musicOn))}
+  musicBtn.addEventListener('click',()=>{const on=!musicOn;ls.set(NS+'mute',on?'0':'1');setMusic(on)});
+  fetch('music.mp3',{method:'HEAD'}).then(r=>{if(r.ok){audio.src='music.mp3';musicReady=true;musicBtn.hidden=false}}).catch(()=>{});
+
   function sayYes(){
-    saidYes=true;ls.set(NS+'yes','1');confetti();showView();taunt.textContent='';
+    saidYes=true;ls.set(NS+'yes','1');confetti();if(ls.get(NS+'mute')!=='1')setMusic(true);showView();taunt.textContent='';
     setTimeout(()=>(mine.name?$('dishInput'):$('nameInput')).focus(),50);
   }
   function showView(){
@@ -302,6 +321,16 @@ function run(P){
     saveMine(dish?'Saved: '+dish+'. Everyone sees it now.':"You're on the list. Add a dish when you decide.");
     $('inTitle').textContent="You're in, "+n+"!";$('dishInput').focus();
   });
+  function addDish(dish){
+    if(!dish)return false;
+    if(mine.items.length>=12){say('That is plenty of food. Remove something before adding more.',true);return false}
+    mine.items.push(dish);saveMine('Saved: '+dish+'. Everyone sees it now.');return true;
+  }
+  function claim(g){
+    gid=g.id;ls.set(NS+'gid',gid);ls.set(NS+'name',g.name);ls.set(NS+'yes','1');
+    mine.name=g.name;mine.items=g.items.slice();if(g.createdAt!=null)mine.createdAt=g.createdAt;
+    saidYes=true;$('nameInput').value=g.name;showView();render();
+  }
   function removeItem(g,idx){
     if(g.id===gid){mine.items.splice(idx,1);saveMine('Removed.');return}
     if(!isHost)return;
@@ -312,6 +341,7 @@ function run(P){
   /* ---------- the table ---------- */
   function render(){
     const cards=$('cards'),empty=$('empty'),tally=$('tally');
+    if(document.activeElement&&document.activeElement.id==='cardDish')refocus=true;
     cards.textContent='';
     if(dbState!=='ready'&&!guests.length){
       empty.hidden=false;
@@ -322,7 +352,7 @@ function run(P){
     }
     const list=guests.filter(g=>g.name).sort((a,b)=>(b.host?1:0)-(a.host?1:0)||(a.createdAt||0)-(b.createdAt||0));
     if(!list.length){empty.hidden=false;empty.textContent='Nobody has signed up yet. Say yes above and be the first dish on the table.';tally.textContent='0 coming';return}
-    empty.hidden=true;let dishes=0;
+    empty.hidden=true;let dishes=0;const hasMine=guests.some(x=>x.id===gid);
     list.forEach(g=>{
       const items=Array.isArray(g.items)?g.items:[];dishes+=items.length;
       const card=el('article','card'+(g.id===gid?' me':''));
@@ -339,6 +369,22 @@ function run(P){
         });
         card.appendChild(ul);
       }else card.appendChild(el('p','tbd','coming, still deciding'));
+      if(g.id===gid){
+        if(cardOpen){
+          const f=el('form','cardadd');const inp=el('input');inp.type='text';inp.id='cardDish';inp.maxLength=60;inp.placeholder='What else?';inp.value=cardDraft;inp.setAttribute('aria-label','Add another item');
+          inp.addEventListener('input',()=>{cardDraft=inp.value});
+          const b=el('button','btn','Add');b.type='submit';
+          f.appendChild(inp);f.appendChild(b);
+          f.addEventListener('submit',e=>{e.preventDefault();const v=inp.value.trim();if(!v)return;cardDraft='';refocus=true;if(!addDish(v))render()});
+          card.appendChild(f);
+          if(refocus){refocus=false;setTimeout(()=>{const n=$('cardDish');if(n)n.focus()},0)}
+        }else{
+          const a=el('button','addlink','+ Add an item');a.type='button';
+          a.addEventListener('click',()=>{cardOpen=true;refocus=true;render()});card.appendChild(a);
+        }
+      }else if(!hasMine&&!isHost&&!g.host){
+        const c=el('button','link','This is me');c.type='button';c.addEventListener('click',()=>claim(g));card.appendChild(c);
+      }
       cards.appendChild(card);
     });
     tally.textContent=list.length+' coming · '+dishes+(dishes===1?' dish':' dishes')+(dbState==='slow'?' · may be out of date':'');
