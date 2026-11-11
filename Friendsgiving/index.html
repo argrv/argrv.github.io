@@ -103,6 +103,18 @@ input[type=text]{width:100%;padding:11px 12px;border:2px solid var(--ink);border
 .comment span{min-width:0}
 .comment .x{color:inherit}
 .cardactions{display:flex;flex-wrap:wrap;gap:8px}
+.cmt{background:var(--surface);border:3px solid var(--ink);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.cmt.gone{border-style:dashed;border-color:var(--line);color:var(--muted)}
+.chead{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px}
+.chead b{font-family:var(--display);font-weight:400;font-size:19px;line-height:1.1;overflow-wrap:anywhere}
+.chead time{font-size:13px;color:var(--muted)}
+.ctext{overflow-wrap:anywhere;white-space:pre-wrap}
+.cacts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.react{border:2px solid var(--line);background:var(--bg);border-radius:99px;padding:3px 11px;font-size:14px;cursor:pointer;font-variant-numeric:tabular-nums}
+.react[aria-pressed="true"]{border-color:var(--ink);background:var(--mustard);color:var(--mustard-ink);font-weight:700}
+.cacts .link{align-self:center}
+.clist,.thread{display:flex;flex-direction:column;gap:12px}
+.replies{margin-left:18px;border-left:3px solid var(--line);padding-left:12px;display:flex;flex-direction:column;gap:10px}
 .empty{border:3px dashed var(--line);border-radius:6px;padding:22px;color:var(--muted)}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 .locked{padding-block:18vh 40px;display:flex;flex-direction:column;gap:12px}
@@ -151,10 +163,9 @@ input[type=text]{width:100%;padding:11px 12px;border:2px solid var(--ink);border
         <form id="form" class="fields" autocomplete="off">
           <div class="field name"><label for="nameInput">Your name</label><input type="text" id="nameInput" maxlength="30" placeholder="First name" required></div>
           <div class="field"><label for="dishInput">What are you bringing?</label><input type="text" id="dishInput" maxlength="60" placeholder="Mac and cheese, wine, a pie…"></div>
-          <div class="field wide"><label for="commentInput">Comment for everyone (optional)</label><input type="text" id="commentInput" maxlength="200" placeholder="Can't wait! Who's bringing dessert?"></div>
           <button class="btn" id="addBtn" type="submit">Add to the table</button>
         </form>
-        <p class="note" id="status" aria-live="polite">Everything saves the moment you add it. Bringing more than one thing? Add them one at a time. You can add or change your comment any time from your card below.</p>
+        <p class="note" id="status" aria-live="polite">Everything saves the moment you add it. Bringing more than one thing? Add them one at a time.</p>
         <button class="link" id="replay" type="button">Try saying no again</button>
       </div>
     </section>
@@ -165,11 +176,22 @@ input[type=text]{width:100%;padding:11px 12px;border:2px solid var(--ink);border
       <div class="cards" id="cards"></div>
       <p class="empty" id="empty">Loading who's coming and what they're bringing…</p>
     </section>
+    <section id="talk">
+      <h2>Comments</h2>
+      <form id="cform" class="fields" autocomplete="off">
+        <div class="field name" id="cnameWrap"><label for="cname">Your name</label><input type="text" id="cname" maxlength="30" placeholder="First name"></div>
+        <div class="field"><label for="ctext">Say something to everyone</label><input type="text" id="ctext" maxlength="300" placeholder="Can't wait! Who's bringing dessert?"></div>
+        <button class="btn" type="submit">Post</button>
+      </form>
+      <p class="note" id="cstatus" aria-live="polite"></p>
+      <div class="clist" id="clist"></div>
+      <p class="empty" id="cempty">Loading comments…</p>
+    </section>
   </main>
 </div>
 
 <script type="module">
-const BLOB="MsuSBaPJ3sErqYBFW8kH/u882EkAGgfpTw3P/eP6vGtTC7Cp1QDwPB2b0A7BDjXLuSVqWxGyaCuHhqiIpTejNCaut9eQjfJsFDbCgUXQfkiYHJDjfdlXddavt+6k1RuSpXpIekq0dTJ9MefcOW51lAOs6WQza1ufH30AwsLoklSol5kVPxU/qI4EpveTCsFz3B2pxg4SWwz4uK+hhDeo2qsOVoT91rXWRmPlwMGSSiyKwPP1+IlBBy0q63K4hQzKdaDse3wiLgbzOejM+MFlC9nraaQjPYK8sNfjF4iEfeIkKnI1VftgASejZVtSudmq/VWSn7g9NlUAH/23Rbp9hl+6/8CbiHf8y4JWMMtePZvxIiS7UufVylxd8my2BNzD9Ei7A+OglWzoopc0bkn3oFmjSoPhSTzgF7loJtQAm4FY8mepTQIS2l7QH+/mshkMLWwDfWOEh4xeMkSy9dBmp9U0hAA2a+ESt4hXpfyeXTyywCGdtMkG7qVu19NSNTEwyIuyw5J2B4+dwePqE/+RZW3LIeow+Zid42CaemzZChz/yhSUnqMYKU4oixSm2J6yMsJyTsKoIxNmC+G3c/Syva5w90iUOckinQZ+8OepiC4vIoJvZd/IR21oKAOEbVmz1D2bZc003Zqwk64R6j+O3ZjcS5Mxq2RI8SkqKbRUayaYZIRhaZhIz8ngl876+17chH3NTZsO8UTiOwc3YK1+8CalAs7mg0pmfh+GQdL+SMN0cUaOywKEPf4OlBLUicpYHLYedAyikpmjRqu32EXyNbncwT4FCPCdPrqM5KxFVtr22FWShEJC7C6lGaRn5MD5YUQri5Rq+Ja8Ay6KUNAPvMRVl3zTLsKf12k9VEjibQc6nCxXHqfKNsGE8syxc4DwgZSr/PpZPJJUcqPFpsC90MlFe+X2qhfXe/uDVOkRWr6PXh1FZXPTjrJkAUqNXEFomXVG3d7vLeDVuZEl6Gp80CqRscmxhG1E3TLyiMMFnYmQYfcI7SBd6EjyUfC7luCLwzkxk3Na/g2Q+g6559gvjY07DoebgsjY4CSkfmwbblqN+gruCUF/OYrMmrjz42DLLmJqND7qLMsrbkDcEynua2jwtTfqAdTNmcruFSuOoSFDhWHS9mTaUeNR9ccenyjRuXdphtulVYpfscAD69kkupLpSnxIrA==";
+const BLOB="Y8Pbi57KHltQl7unUoywzzKUVh24xNWaGDzT8xaywfXEDTz+oJXhD/sIHSp0CmVl+PJgLvqQucjhzy/xUVdmH3yorUURmC/Okr+CJcwaTjxvnHTRW6Nga6bimtbg3O2hFvSEvxIYlGQmcH0RtXPLgeOXQzabjGaKeTK8WphPUKhKg6TofIhmuqNMD0GIuPtqtdmUt/h4vFeAfOOBkX3ON0m9Fe2DP3upUBz6RfA1uMlxcVf0sF2EMEbugb6jdJNkW7KllsSbf7N9nraCDx7Y58wKq06EeVsvImArEhGn4ms95gq68w/l4SgT+OKiQpDrbUuMhepE24FqBSJJYgxHYnetwycQHZwW+mOfylXbp8Tw4vdXtGvbP7XqWUBGr0gQm4HTTLdnwSGhXSaYOBdP4jjBGbLVBDM7Wz1sYUhGbruqGFQsLUD3fQYERwvofFceF8Q4t6j9NaYW/rNMfDZcAb8qsVThDGbge82UEpiECCEHvQ6MiDCSLUP92Ev2evR6hWvAd4t3z/mxPoZx0Pp+a7eFR95iJj4xIJK2E56x7+sy/bj+JaMVZ9p2ZpTE6vIbRDNYonz4GYluDMh7mpP86gTnzD3f/RQxRuOotFXyGTKm2H4tEkzqoRvaDsGUGBdonAM8/XAt0M+OrfTaON52C4HG8hxa98sUKOjHsKdTnSU8vrtb1ZMbb30lDDVodw+Xszu3MovrnPGemnnvMtBzoiha6ZUE6PBgALACx8nFzoa92EPoLNLr3Ka4dCtdbmWidnVHHlQDXt8vOvVbOas7qdgTTh0trNKt8NtUWbjZ8M7R8uzFvwtGpU5ljHezL2kaUyiDMnb4/ayojL3HRSC0E4pqfwSg+DrfYZddlDovByRLNU/R90W9UAjM2ThuSrO33jC3oTLSijCnVTg8IiGpcIw51QhQYBYu0if6w7mWKrsAF2jQXY4c2De1nNSh7mdvjzLu2Oht0VYjzCW1CKJXsFUfqJvVfchX3tHt7x8qgOLZrkVw3gSbP3P3Nk7PgGYblqiB1QaVNfcvYbx0jMdQ3vnOJ5J5U5tZWz8+UuAzSFx9jeMVhgtlFKWi5nrJwlMdR5TRMqmJ4gGOtGzG/PHa6ZQFrS54j29LBFSBUhI/N4pEKwUPc3cwyR8L38bXy3pYSoET+7viW15Oaq07JbHarRqvBknAyQ==";
 const firebaseConfig={
   apiKey:"AIzaSyCc8gxFBcyhJ371Rnn0zqGLqR2UDKLn3K8",
   authDomain:"friendsgiving-85ccf.firebaseapp.com",
@@ -220,6 +242,7 @@ function run(P){
   let gid=isHost?'host':(ls.get(NS+'gid')||('g'+Math.random().toString(36).slice(2,12)));
   let saidYes=isHost||ls.get(NS+'yes')==='1';
   let cardOpen=false,cardDraft='',refocus=false,cOpen=false,cDraft='',refocusC=false;
+  let comments=[],replyTo=null,replyDraft='',refocusR=false;
   let guests=[],readOnly=false,dbState='loading',pending=0,chain=Promise.resolve(),api=null,seeded=false;
   const mine={name:isHost?P.seed.name:(ls.get(NS+'name')||''),comment:'',items:[],createdAt:isHost?0:Date.now()};
 
@@ -338,10 +361,8 @@ function run(P){
     if(!n){say('Add your name first so everyone knows who is bringing it.',true);$('nameInput').focus();return}
     if(dish&&mine.items.length>=12){say('That is plenty of food. Remove something before adding more.',true);return}
     mine.name=n;ls.set(NS+'name',n);ls.set(NS+'gid',gid);
-    const note=$('commentInput').value.trim();
     if(dish){mine.items.push(dish);$('dishInput').value=''}
-    if(note){mine.comment=note.slice(0,200);$('commentInput').value=''}
-    saveMine(dish?'Saved: '+dish+'. Everyone sees it now.':note?'Comment saved. Everyone sees it now.':"You're on the list. Add a dish when you decide.");
+    saveMine(dish?'Saved: '+dish+'. Everyone sees it now.':"You're on the list. Add a dish when you decide.");
     $('inTitle').textContent="You're in, "+n+"!";$('dishInput').focus();
   });
   function addDish(dish){
@@ -399,21 +420,7 @@ function run(P){
         });
         card.appendChild(ul);
       }else card.appendChild(el('p','tbd','coming, still deciding'));
-      if(g.comment){
-        const q=el('p','comment');q.appendChild(el('span',null,'\u201C'+String(g.comment).slice(0,200)+'\u201D'));
-        if(g.id===gid||isHost){const x=el('button','x','×');x.type='button';x.setAttribute('aria-label','Remove comment');x.addEventListener('click',()=>clearComment(g));q.appendChild(x)}
-        card.appendChild(q);
-      }
       if(g.id===gid){
-        if(cOpen){
-          const f=el('form','cardadd');const inp=el('input');inp.type='text';inp.id='cardComment';inp.maxLength=200;inp.placeholder='Say something to everyone';inp.value=cDraft;inp.setAttribute('aria-label','Your comment');
-          inp.addEventListener('input',()=>{cDraft=inp.value});
-          const b=el('button','btn','Post');b.type='submit';
-          f.appendChild(inp);f.appendChild(b);
-          f.addEventListener('submit',e=>{e.preventDefault();const v=inp.value.trim();if(!v)return;mine.comment=v.slice(0,200);cOpen=false;cDraft='';saveMine('Comment saved. Everyone sees it now.')});
-          card.appendChild(f);
-          if(refocusC){refocusC=false;setTimeout(()=>{const n=$('cardComment');if(n)n.focus()},0)}
-        }
         if(cardOpen){
           const f=el('form','cardadd');const inp=el('input');inp.type='text';inp.id='cardDish';inp.maxLength=60;inp.placeholder='What else?';inp.value=cardDraft;inp.setAttribute('aria-label','Add another item');
           inp.addEventListener('input',()=>{cardDraft=inp.value});
@@ -426,12 +433,8 @@ function run(P){
           const a=el('button','addlink','+ Add an item');a.type='button';
           a.addEventListener('click',()=>{cardOpen=true;refocus=true;render()});
           const row=el('div','cardactions');row.appendChild(a);
-          if(!cOpen){const c=el('button','addlink',g.comment?'Edit comment':'+ Add a comment');c.type='button';
-            c.addEventListener('click',()=>{cOpen=true;cDraft=mine.comment||'';refocusC=true;render()});row.appendChild(c)}
           card.appendChild(row);
         }
-        if(cardOpen&&!cOpen){const c=el('button','addlink',g.comment?'Edit comment':'+ Add a comment');c.type='button';
-          c.addEventListener('click',()=>{cOpen=true;cDraft=mine.comment||'';refocusC=true;render()});card.appendChild(c)}
       }else if(!hasMine&&!isHost&&!g.host){
         const c=el('button','link','This is me');c.type='button';c.addEventListener('click',()=>claim(g));card.appendChild(c);
       }
@@ -440,7 +443,85 @@ function run(P){
     tally.textContent=list.length+' coming · '+dishes+(dishes===1?' dish':' dishes')+(dbState==='slow'?' · may be out of date':'');
   }
 
-  showView();render();
+  /* ---------- comments, replies, reactions ---------- */
+  const REACTS=[['like','👍','Like'],['love','❤️','Love'],['dislike','👎','Dislike']];
+  function cs(msg,err){const n=$('cstatus');n.textContent=msg;n.classList.toggle('err',!!err)}
+  function cfail(e){cs(e&&e.code==='permission-denied'?"The page wouldn't accept that.":"That didn't save. Check your connection and try again.",true)}
+  function ago(ts){const m=Math.floor((Date.now()-ts)/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';if(m<1440)return Math.floor(m/60)+'h ago';
+    return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'})}
+  function postComment(text,parent){
+    if(!api){cs("Can't reach the comments right now. Check your connection and reload.",true);return false}
+    const name=(mine.name||$('cname').value.trim()).slice(0,30);
+    if(!name){cs('Add your name first so everyone knows who said it.',true);$('cname').focus();return false}
+    if(!mine.name){mine.name=name;ls.set(NS+'name',name);ls.set(NS+'gid',gid);if(!$('nameInput').value)$('nameInput').value=name}
+    const id='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    api.setDoc(api.doc(api.col,id),{type:'comment',name,items:[],text:text.slice(0,300),parent:parent||'',author:gid,reactions:{},createdAt:Date.now()})
+      .then(()=>cs(parent?'Reply posted.':'Comment posted.'),cfail);
+    return true;
+  }
+  function react(c,kind){
+    if(!api)return;
+    const patch={};patch['reactions.'+gid]=c.reactions[gid]===kind?api.deleteField():kind;
+    api.updateDoc(api.doc(api.col,c.id),patch).catch(cfail);
+  }
+  function removeComment(c){if(api)api.updateDoc(api.doc(api.col,c.id),{deleted:true}).then(()=>cs('Comment removed.'),cfail)}
+  $('cform').addEventListener('submit',e=>{
+    e.preventDefault();const v=$('ctext').value.trim();if(!v){$('ctext').focus();return}
+    if(postComment(v,'')){$('ctext').value='';renderComments()}
+  });
+  function cnode(c,isReply){
+    const a=el('article','cmt'+(c.deleted?' gone':''));
+    if(c.deleted){a.appendChild(el('p',null,'Comment removed'));return a}
+    const h=el('div','chead');h.appendChild(el('b',null,String(c.name||'Someone').slice(0,30)));
+    if(c.author==='host')h.appendChild(el('span','chip','Host'));
+    const t=el('time',null,ago(c.createdAt));h.appendChild(t);a.appendChild(h);
+    a.appendChild(el('p','ctext',c.text.slice(0,300)));
+    const acts=el('div','cacts');
+    REACTS.forEach(([k,emo,label])=>{
+      let n=0;for(const u in c.reactions)if(c.reactions[u]===k)n++;
+      const on=c.reactions[gid]===k;
+      const b=el('button','react',emo+(n?' '+n:''));b.type='button';b.setAttribute('aria-pressed',String(on));
+      b.setAttribute('aria-label',label+(n?', '+n:''));b.title=label;
+      b.addEventListener('click',()=>react(c,k));acts.appendChild(b);
+    });
+    if(!isReply){const r=el('button','link','Reply');r.type='button';
+      r.addEventListener('click',()=>{replyTo=replyTo===c.id?null:c.id;replyDraft='';refocusR=true;renderComments()});acts.appendChild(r)}
+    if(c.author===gid||isHost){const x=el('button','link','Remove');x.type='button';x.addEventListener('click',()=>removeComment(c));acts.appendChild(x)}
+    a.appendChild(acts);return a;
+  }
+  function renderComments(){
+    const list=$('clist'),empty=$('cempty');
+    if(document.activeElement&&document.activeElement.id==='replyInput')refocusR=true;
+    $('cnameWrap').hidden=!!mine.name;
+    list.textContent='';
+    if(dbState!=='ready'&&!comments.length){
+      empty.hidden=false;empty.textContent=dbState==='loading'?'Loading comments…':dbState==='slow'?'Still trying to reach the comments.':"Comments couldn't load. Check your connection and reload the page.";return;
+    }
+    const byTime=(a,b)=>a.createdAt-b.createdAt;
+    const tops=comments.filter(c=>!c.parent).sort(byTime);let shown=0;
+    tops.forEach(c=>{
+      const reps=comments.filter(r=>r.parent===c.id&&!r.deleted).sort(byTime);
+      if(c.deleted&&!reps.length)return;
+      shown++;
+      const th=el('div','thread');th.appendChild(cnode(c,false));
+      if(reps.length||replyTo===c.id){
+        const box=el('div','replies');reps.forEach(r=>box.appendChild(cnode(r,true)));
+        if(replyTo===c.id){
+          const f=el('form','cardadd');const inp=el('input');inp.type='text';inp.id='replyInput';inp.maxLength=300;inp.placeholder='Write a reply';inp.value=replyDraft;inp.setAttribute('aria-label','Reply to '+(c.name||'comment'));
+          inp.addEventListener('input',()=>{replyDraft=inp.value});
+          const b=el('button','btn','Reply');b.type='submit';f.appendChild(inp);f.appendChild(b);
+          f.addEventListener('submit',e=>{e.preventDefault();const v=inp.value.trim();if(!v)return;if(postComment(v,c.id)){replyTo=null;replyDraft='';renderComments()}});
+          box.appendChild(f);
+          if(refocusR){refocusR=false;setTimeout(()=>{const n=$('replyInput');if(n)n.focus()},0)}
+        }
+        th.appendChild(box);
+      }
+      list.appendChild(th);
+    });
+    empty.hidden=shown>0;if(!shown)empty.textContent='No comments yet. Start the conversation.';
+  }
+
+  showView();render();renderComments();
 
   /* ---------- floating Thanksgiving things: tap one ---------- */
   (function(){
@@ -483,10 +564,12 @@ function run(P){
   const V='https://www.gstatic.com/firebasejs/10.12.2/';
   Promise.all([import(V+'firebase-app.js'),import(V+'firebase-firestore.js')]).then(([A,F])=>{
     const db=F.getFirestore(A.initializeApp(firebaseConfig));
-    api={setDoc:F.setDoc,doc:F.doc,col:F.collection(db,'parties',key,'guests')};
+    api={setDoc:F.setDoc,updateDoc:F.updateDoc,deleteField:F.deleteField,doc:F.doc,col:F.collection(db,'parties',key,'guests')};
     F.onSnapshot(api.col,{includeMetadataChanges:true},snap=>{
       if(!snap.metadata.fromCache){clearTimeout(timer);dbState='ready'}
-      guests=snap.docs.map(d=>{const b=d.data()||{};return {id:d.id,name:b.name,items:Array.isArray(b.items)?b.items.slice():[],comment:typeof b.comment==='string'?b.comment:'',host:!!b.host,createdAt:b.createdAt}});
+      const rows=snap.docs.map(d=>({id:d.id,b:d.data()||{}}));
+      comments=rows.filter(r=>r.b.type==='comment').map(({id,b})=>({id,name:b.name,text:typeof b.text==='string'?b.text:'',parent:b.parent||'',author:b.author||'',reactions:(b.reactions&&typeof b.reactions==='object')?b.reactions:{},createdAt:b.createdAt||0,deleted:!!b.deleted}));
+      guests=rows.filter(r=>r.b.type!=='comment').map(({id,b})=>{return {id,name:b.name,items:Array.isArray(b.items)?b.items.slice():[],comment:typeof b.comment==='string'?b.comment:'',host:!!b.host,createdAt:b.createdAt}});
       if(dbState==='ready'&&!seeded){seeded=true;
         if(!guests.some(g=>g.id==='host'))F.setDoc(F.doc(api.col,'host'),{name:P.seed.name,items:P.seed.items,host:true,createdAt:0,updatedAt:Date.now()}).catch(()=>{});
       }
@@ -495,9 +578,9 @@ function run(P){
         if(g){mine.items=g.items.slice();mine.comment=g.comment||'';if(g.name)mine.name=g.name;if(g.createdAt!=null)mine.createdAt=g.createdAt}
         if(saidYes&&mine.name){$('inTitle').textContent="You're in, "+mine.name+"!";if(!$('nameInput').value)$('nameInput').value=mine.name}
       }else upsertLocal();
-      render();
-    },()=>{clearTimeout(timer);if(dbState!=='ready')dbState='none';render()});
-  }).catch(()=>{clearTimeout(timer);dbState='none';render()});
+      render();renderComments();
+    },()=>{clearTimeout(timer);if(dbState!=='ready')dbState='none';render();renderComments()});
+  }).catch(()=>{clearTimeout(timer);dbState='none';render();renderComments()});
 }
 </script>
 </body>
