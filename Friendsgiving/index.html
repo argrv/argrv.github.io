@@ -90,6 +90,10 @@ input[type=text]{width:100%;padding:11px 12px;border:2px solid var(--ink);border
 .cardadd .btn{padding:6px 12px;box-shadow:2px 2px 0 var(--ink)}
 .addlink{background:none;border:2px dashed var(--ink);border-radius:4px;padding:6px 10px;font-weight:700;font-size:14px;cursor:pointer;align-self:flex-start}
 .music{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:15;background:var(--mustard);color:var(--mustard-ink);border:3px solid var(--ink);border-radius:99px;padding:8px 14px;font-weight:700;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+.hostnote{background:var(--surface);border:3px solid var(--ink);border-radius:6px;padding:20px 22px;transform:rotate(.6deg);box-shadow:6px 6px 0 var(--mustard);gap:10px}
+.hostnote .eyebrow{color:var(--leaf)}
+.hostnote blockquote{margin:0;font-family:var(--hand);font-weight:600;font-size:clamp(24px,5.6vw,29px);line-height:1.25}
+.hostnote .sig{font-family:var(--hand);font-weight:700;font-size:34px;line-height:1;color:var(--cran);align-self:flex-end;transform:rotate(-3deg)}
 .empty{border:3px dashed var(--line);border-radius:6px;padding:22px;color:var(--muted)}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 .locked{padding-block:18vh 40px;display:flex;flex-direction:column;gap:12px}
@@ -117,6 +121,11 @@ input[type=text]{width:100%;padding:11px 12px;border:2px solid var(--ink);border
   </div></div>
 
   <main class="wrap">
+    <section class="hostnote" id="hostnote" hidden>
+      <p class="eyebrow">A note from your host</p>
+      <blockquote id="noteText"></blockquote>
+      <p class="sig" id="noteSig"></p>
+    </section>
     <section id="rsvp">
       <h2>Are you coming?</h2>
       <p class="sub" id="rsvpHint">Drag the turkey onto your answer. Choose carefully.</p>
@@ -149,7 +158,7 @@ input[type=text]{width:100%;padding:11px 12px;border:2px solid var(--ink);border
 </div>
 
 <script type="module">
-const BLOB="RRR5GrEUIqyKa/SFBiOOvSRAvndglapTlDDcpN+qnejlmK8wRQ0XMK5ZzzxRqaqYfjqSVakPKtLJvCCX7oSsaGdLiootcTjcQXYPgMYlV2lKGpBf0gQViqI9FkY8W3DCEdMYzryDh19NS15/MR52F9aCp6kTUhD7/SuFfwHM+JTMRaK3FnIZ34g+vVq4M8/o6OFD5eBmyAUrgQbHGuuSiO3dUWi2ryEBbD/Y6wZ2wqwtVOPQV+XdNUSKm5llqz1etb8ySBy0m/ylmS3hea/Uy7Mp66ZchMsrZDeKf/okkwdDocDBptK2FXJnyD30hvLmpMQtRPlIlb1H4H0H5P97bj4+0MhMbMuP/US9JiGf7CAwOhvC7xeOhtF8jy8WMRMyR04WJpk0NqLjrh5Aqe0XruZ/xEcs4Kea0+1fZ/Bo/LX4jst1PtPAJWvr4Rz2ZBPcl8R5rXa26+0xxlwxFZYA6jBLaOCniDHfU0BcQDy/D7Lnsop2ybghjWTpQyVaLBbsP430KgmAUV/AcDuRD0ctYpPa1YbPMk5/zYLCOyjbSpHEgVdWT8x8iUOvvRm8pQYqNl7Pd3LyL2XR5KDH9qShcTGDV28ap63CYChVL4DHmq5EAoYbtrdBOWr1ueUhpS7R4MArnM3VVxWvV5dG8YE+dDYxHuddEPO1SDg79/IaXiTWESz3rBD7hUuRxYMIq3yyM+I9PmV8QZzpHE9NJ4BorAGvlgxEHSwpwWlqHGs+uK5iRtcdlzGPFxBwUzsps3eS3b3Ijhd78xU3AyAZpJr7+uyEFMA=";
+const BLOB="MaXAFRxi4arCvKYSThjAe1PhpTt9XcjEpbQ8ZconqUwDf/lY1ddPM0Ixvl5fk1VqxPC2tXBCev1639pO0ErLFf7o45VDDxv++yD6MF3oYZ5bRAFCqcdGghbm95x05GFBE8wi9aQmCgI1JzeupXdM7PCK82oD/1DvIOjytj9sC57p3v8cbW49kg6vmPSpNOAkD2Hf2iUCNd71MeoknS7HxvDtSmf/hm7uyN4RnON5iStCA8YA0h+xyBnJU8YicfvK7h5NGYb3l0o065oilUibAzq0Id+Wl+lQEUq3Di33zaPvAOtOHCVaawcGywGDRMNWzep8+nTpcWbQuLrJWHCUZoQl1BG1lEQCdyfyTAYtWBdvQbFmJ1xwcr0PwcjzeVlC5PkuMWz7y61SpaJQeJ/YJ9/CPdvjJ8cVFaDGw9H/cAaToaKEDGCZYt6o+zt2kgva5ltntxPrfE7SWk3x8l48PrBXlwNBelCsB69yXbstrUy68V1TWE73E8v7hz0rmra/c7HRzobj4oC2ZFFwC+Ti8JABM4Z1eW1Jsx9lfxnpXXPfAaGpEORFZt4/DOoFGfV1kdT9hBmOTyvlJiAKrFzVp4OcioNXZ/RrwqeanxQlVNDtgtemrh9IVt5DX3JqWt47Y864QykOHpik1p3n3rHAjdySkTpAX/XnOlUqBPnr+mmLEWidNdy8nWsRikIBnWyeQ1uSf9wTQnvCZ3NT1J/TGODEy45x+n1Eoj97qUP4HNTTbuJOMKFadmjtpw6D+YHwGgY06ezQ0d7VWcvtZFl3IyJOu0ENmNuo21lkN+xElNUx7bHcuN3lh2T64+4hv6IB8E1bJwjTH8Ngk6sN1MJds/t0L6Z8/Mz+PC61MxLlGfBj4Thmo96Ccl1yv8z2HvKqpQwEYPPpp61gsn4aNwVuowZM6SCdF/5e5PRRIg15i9VMabbxu9Ni0tVFyARX/Vyum/bQhEzuWgaaQ6U0ONdXF/htMMPrTulIkZqaCRfypxZRj4bba9BuhNmnxdBCpPAk6RzXNcIQR77IQzxzj4oa4+/EMGLrGc/BTxGs2LhMV69XbBf16DZ+E17amvXoAJT1ipagZVKNPS7ylqRghOu8ZOLdPkilzg2h4yoYfgt7I2IfjhU9ne7Q/as5c/pmPkpepY2TRJAV2lQCpEQhFE6nHMHWud8zAA==";
 const firebaseConfig={
   apiKey:"AIzaSyCc8gxFBcyhJ371Rnn0zqGLqR2UDKLn3K8",
   authDomain:"friendsgiving-85ccf.firebaseapp.com",
@@ -190,6 +199,7 @@ function run(P){
   const ds=el('div','stub date');ds.appendChild(el('b',null,P.dateLabel));
   ds.appendChild(el('span',null,d>1?d+' days to go':d===1?'Tomorrow!':d===0?'Today!':'Thanks for coming'));when.appendChild(ds);
   P.stubs.forEach(s=>{const n=el('div','stub');n.appendChild(el('b',null,s[0]));n.appendChild(el('span',null,s[1]));when.appendChild(n)});
+  if(P.note){$('noteText').textContent=P.note;$('noteSig').textContent=P.noteBy;$('hostnote').hidden=false}
   $('locked').hidden=true;$('app').hidden=false;
 
   /* ---------- state ---------- */
